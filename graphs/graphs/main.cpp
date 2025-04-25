@@ -90,12 +90,11 @@ void checkAllNodes(const std::vector<std::vector<int>> adjacencyMatrix)
 
 int main()
 {
-    std::vector<std::vector<int>> M1 = readAdjacencyMatrix("graph.txt");
-    std::cout << "graph.txt\n";
-    checkAllNodes(M1);
+    std::string filename;
+    std::cout << "Enter graph filename: ";
+    std::cin >> filename;
+    std::vector<std::vector<int>> M = readAdjacencyMatrix(filename);
+    checkAllNodes(M);
 
-    std::vector<std::vector<int>> M2 = readAdjacencyMatrix("graph2.txt");
-    std::cout << "\ngraph2.txt\n";
-    checkAllNodes(M2);
     return 0;
 }

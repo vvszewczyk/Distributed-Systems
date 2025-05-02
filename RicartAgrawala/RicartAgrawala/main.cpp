@@ -1,11 +1,11 @@
 #include <algorithm>
-#include <ctime>
 #include <iostream>
 #include <queue>
-#include <random>
 #include <tuple>
 #include <utility>
 #include <vector>
+
+static constexpr bool VERBOSE = true;
 
 /* ----------------------  protocol definitions  ---------------------- */
 
@@ -54,6 +54,11 @@ struct Node
         std::fill(gotReply.begin(), gotReply.end(), false);
         gotReply[id] = true;
 
+        if (VERBOSE)
+        {
+            std::cout << "[REQ] Node " << id << " @ts=" << requestTs << "\n";
+        }
+
         for (std::size_t i = 0; i < N; ++i)
         {
             if (i != id)
@@ -68,6 +73,12 @@ struct Node
     void recieveRequest(const Message &m, std::queue<Message> &bus, int N)
     {
         clock = std::max(clock, m.timestamp) + 1; // Lamport's rule
+
+        if (VERBOSE)
+        {
+            std::cout << "[MSG] Node " << id << " got " << (m.type == MessageType::Request ? "REQ" : "REP") << " from "
+                      << m.from << " @msgTs=" << m.timestamp << "\n";
+        }
 
         if (m.type == MessageType::Reply) /* ------ REPLY ------ */
         {
@@ -91,12 +102,12 @@ struct Node
             if (state == State::Wanted && ok)
             {
                 state = State::Held;
-                std::cout << "Node " << id << " ENTERS CS (timestamp=" << clock << ")\n";
+                std::cout << "[ENTER-CS] Node " << id << " @clk=" << clock << "\n";
 
                 // CRITICAL SECTION
 
                 state = State::Released;
-                std::cout << "Node " << id << " LEAVES  CS  (timestamp=" << clock << ")\n";
+                std::cout << "[LEAVE-CS] Node " << id << " @clk=" << clock << "\n";
 
                 // Serve every deferred requester
                 for (int dst : deferred)
@@ -117,6 +128,10 @@ struct Node
             if (deferIt == true)
             {
                 deferred.push_back(m.from); // Answer later
+                if (VERBOSE)
+                {
+                    std::cout << "[DEF] Node " << id << " defers REQ from " << m.from << "\n";
+                }
             }
             else
             {
